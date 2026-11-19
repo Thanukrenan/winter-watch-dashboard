@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Winter Watch — County Cavan winter roads decision-support dashboard.">
+  <title>Winter Watch | Roads Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="Winter Watch home">
+        <span class="brand-mark">❄</span>
+        <span><strong>WINTER WATCH</strong><small>ROADS INTELLIGENCE</small></span>
+      </a>
+      <div class="side-label">WORKSPACE</div>
+      <a class="nav-link active" href="#overview"><span>▦</span> Overview</a>
+      <a class="nav-link" href="#routes"><span>⌁</span> Route monitoring</a>
+      <a class="nav-link" href="#depots"><span>▤</span> Depot & resources</a>
+      <a class="nav-link" href="#history"><span>◷</span> Winter history</a>
+      <a class="nav-link" href="#assistant"><span>✧</span> AI decision assistant</a>
+      <div class="sidebar-bottom">
+        <div class="safety-note"><span class="safety-icon">ⓘ</span><div><b>Decision support only</b><p>The Duty Engineer retains responsibility for every treatment decision. This system never dispatches vehicles.</p></div></div>
+        <div class="sidebar-foot">PRACTICE PROJECT · 2026/27</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div><div class="eyebrow">COUNTY CAVAN · WINTER SERVICE</div><h1>Operations overview</h1><p class="subheading">A clear view of road conditions, treatment priorities and resources.</p></div>
+        <div class="top-actions"><span class="status-dot"></span><span class="status-text">Decision support active</span><button class="refresh-btn" id="refreshBtn">↻ <span>Refresh data</span></button></div>
+      </header>
+
+      <section class="notice" id="dataNotice"><span>●</span><div><b>Data connection</b><p>Loading the exercise datasets. Figures will appear when the source files are available.</p></div></section>
+
+      <section id="overview" class="kpi-grid">
+        <article class="kpi-card"><div class="kpi-top"><span>Routes monitored</span><span class="kpi-icon blue">⌁</span></div><div class="kpi-value" id="routeCount">—</div><div class="kpi-foot">From route register</div></article>
+        <article class="kpi-card"><div class="kpi-top"><span>Depot locations</span><span class="kpi-icon violet">▤</span></div><div class="kpi-value" id="depotCount">5</div><div class="kpi-foot">County Cavan network</div></article>
+        <article class="kpi-card"><div class="kpi-top"><span>Historical treatment runs</span><span class="kpi-icon cyan">↗</span></div><div class="kpi-value" id="runCount">—</div><div class="kpi-foot">Across available winters</div></article>
+        <article class="kpi-card"><div class="kpi-top"><span>Historical ice incidents</span><span class="kpi-icon amber">⚠</span></div><div class="kpi-value" id="incidentCount">—</div><div class="kpi-foot">Recorded in history dataset</div></article>
+      </section>
+
+      <section class="section-grid">
+        <article class="panel wide" id="routes">
+          <div class="panel-heading"><div><div class="eyebrow">NETWORK STATUS</div><h2>Route monitoring</h2><p>Route register and service priority information.</p></div><span class="pill neutral" id="routeStatus">Awaiting data</span></div>
+          <div class="table-wrap"><table><thead><tr><th>Route</th><th>Priority</th><th>Route description</th><th>Length</th><th>Monitoring</th></tr></thead><tbody id="routesBody"><tr><td colspan="5" class="empty">Waiting for routes.csv…</td></tr></tbody></table></div>
+        </article>
+        <article class="panel" id="depots">
+          <div class="panel-heading"><div><div class="eyebrow">RESOURCE READINESS</div><h2>Depot overview</h2><p>Salt stock and vehicle availability.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Depot</th><th>Salt stock</th><th>Stock level</th></tr></thead><tbody id="depotsBody"><tr><td colspan="3" class="empty">Depot snapshot will load here.</td></tr></tbody></table></div>
+          <div class="chart-holder small-chart"><canvas id="depotChart" aria-label="Depot salt stock chart"></canvas></div>
+        </article>
+      </section>
+
+      <section class="section-grid" id="history">
+        <article class="panel">
+          <div class="panel-heading"><div><div class="eyebrow">HISTORICAL PATTERNS</div><h2>Winter activity</h2><p>Treatment runs by winter, based on the history file.</p></div></div>
+          <div class="chart-holder"><canvas id="historyChart" aria-label="Historical treatment runs chart"></canvas></div>
+        </article>
+        <article class="panel">
+          <div class="panel-heading"><div><div class="eyebrow">HISTORICAL OUTCOMES</div><h2>Ice incidents</h2><p>Recorded incidents by winter.</p></div></div>
+          <div class="chart-holder"><canvas id="incidentChart" aria-label="Historical ice incidents chart"></canvas></div>
+        </article>
+      </section>
+
+      <section class="panel assistant-panel" id="assistant">
+        <div class="assistant-intro"><div class="assistant-symbol">✧</div><div><div class="eyebrow">WINTER WATCH AI</div><h2>Decision assistant</h2><p>Ask about the winter service plan, route priorities or the data currently loaded.</p></div><span class="pill neutral">Recommendations only</span></div>
+        <div class="suggestions"><button class="suggestion">Explain the route priority rules</button><button class="suggestion">What does the salt threshold mean?</button><button class="suggestion">Summarise the historical data</button></div>
+        <div class="chat-window" id="chatWindow"><div class="chat-message assistant"><span class="avatar">✧</span><div><b>Winter Watch</b><p>Hello. I can explain the service plan and summarise the datasets loaded on this dashboard. Live AI connection will be added after the dashboard is set up.</p></div></div></div>
+        <form id="chatForm" class="chat-form"><input id="chatInput" type="text" placeholder="Ask a question about winter road operations…" autocomplete="off"><button type="submit">Send <span>→</span></button></form>
+        <p class="disclaimer">This assistant provides information and decision support only. The Duty Engineer must review conditions and record the final decision before 16:30. It cannot dispatch trucks.</p>
+      </section>
+
+      <footer class="footer"><span>WINTER WATCH · COUNTY CAVAN ROADS TEAM</span><span id="lastUpdated">Last refresh: not yet loaded</span></footer>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
