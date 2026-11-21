@@ -159,25 +159,76 @@ function planAnswer(question) {
   return "I can currently explain the service-plan rules and summarise datasets loaded on this page. The live AI connection is not configured yet. Try asking about route priorities, salt stock, ground temperature or truck timing.";
 }
 
+
 function addMessage(text, who) {
   const windowEl = $("chatWindow");
   const div = document.createElement("div");
   div.className = `chat-message ${who}`;
-  if (who === "user") div.innerHTML = `<div class="bubble">${esc(text)}</div>`;
-  else div.innerHTML = `<span class="avatar">✧</span><div><b>Winter Watch</b><p>${esc(text)}</p></div>`;
+
+  if (who === "user") {
+    div.innerHTML = `<div class="bubble">${esc(text)}</div>`;
+  } else {
+    div.innerHTML = `<span class="avatar">✧</span><div><b>Winter Watch</b><p>${esc(text)}</p></div>`;
+  }
+
   windowEl.appendChild(div);
   windowEl.scrollTop = windowEl.scrollHeight;
+  return div;
 }
 
-$("chatForm").addEventListener("submit", event => {
+
+const AI_WORKER_URL = "https://winter-watch-ai.dadithanusha.workers.dev/";
+
+$("chatForm").addEventListener("submit", async event => {
   event.preventDefault();
+
   const input = $("chatInput");
   const question = input.value.trim();
+  const sendButton = $("chatForm").querySelector('button[type="submit"]');
+
   if (!question) return;
+
   addMessage(question, "user");
-  addMessage(planAnswer(question), "assistant");
   input.value = "";
+
+  if (sendButton) sendButton.disabled = true;
+  input.disabled = true;
+
+  const loadingMessage = addMessage("Thinking...", "assistant");
+
+  try {
+    const response = await fetch(AI_WORKER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        message: question
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || `Request failed (${response.status})`);
+    }
+
+    loadingMessage.querySelector("p").textContent =
+      result.reply || "The AI returned an empty response.";
+
+  } catch (error) {
+    console.error("Winter Watch AI error:", error);
+
+    loadingMessage.querySelector("p").textContent =
+      `Sorry, I couldn't get an AI response. ${error.message}`;
+
+  } finally {
+    if (sendButton) sendButton.disabled = false;
+    input.disabled = false;
+    input.focus();
+  }
 });
+
 document.querySelectorAll(".suggestion").forEach(button => button.addEventListener("click", () => {
   $("chatInput").value = button.textContent;
   $("chatForm").requestSubmit();
